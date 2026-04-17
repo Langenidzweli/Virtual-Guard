@@ -20,9 +20,9 @@ When anomalous behaviour is detected, the system scores the risk, applies busine
 
 ## Architecture Overview
 
-```
+
 ![Virtual Gaurd](assets/images/Virtual-Gaurd.png)
-```
+
 
 See [docs/architecture.md](docs/architecture.md) for full component diagrams, Kafka topic contracts, and deployment topology.
 
