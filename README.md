@@ -1,6 +1,6 @@
 # Virtual Guard
 
-> AI-powered real-time video surveillance platform — multi-camera object detection, cross-camera tracking, person re-identification, and anomaly detection at scale.
+> AI-powered real-time video surveillance platform, multi-camera object detection, cross-camera tracking, person re-identification, and anomaly detection at scale.
 
 ![System Status](https://img.shields.io/badge/status-in_development-yellow)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
@@ -21,47 +21,7 @@ When anomalous behaviour is detected, the system scores the risk, applies busine
 ## Architecture Overview
 
 ```
-Cameras (RTSP/H.264)
-        │
-        ▼
-┌─────────────────┐
-│ Ingestion        │  FFmpeg / GStreamer — hardware-decoded frames
-│ Service          │  Published to Kafka: raw_frames topic
-└────────┬────────┘
-         │ Apache Kafka (Event Bus)
-    ┌────┴────────────────────────────────────┐
-    │              AI Pipeline                │
-    │  ┌──────────┐  ┌──────────┐            │
-    │  │Detection  │  │Tracking  │            │
-    │  │YOLOv9(GPU)│→ │StrongSORT│            │
-    │  └──────────┘  │ByteTrack │            │
-    │                └────┬─────┘            │
-    │           ┌─────────┴──────┐           │
-    │           │   Re-ID        │           │
-    │           │   OSNet/BoT    │           │
-    │           └─────────┬──────┘           │
-    │           ┌─────────┴──────┐           │
-    │           │  Behaviour     │           │
-    │           │  Autoencoder   │           │
-    │           └─────────┬──────┘           │
-    └─────────────────────┼─────────────────┘
-                          │
-              ┌───────────▼──────────┐
-              │   Decision Engine    │
-              │  Risk Scoring /      │
-              │  Rules / Thresholds  │
-              └───────────┬──────────┘
-           ┌──────────────┼──────────────┐
-           ▼              ▼              ▼
-    Alert Manager    TimescaleDB      Redis
-    SMS/Webhook/     Events/Tracks    Live State
-    Push             History          Cache
-                          │
-                    Object Store
-                    Clips/Crops
-                          │
-                   React Dashboard
-                   Live Feed / Alerts
+![Virtual Gaurd](assets/images/Virtual%20Gaurd.png)
 ```
 
 See [docs/architecture.md](docs/architecture.md) for full component diagrams, Kafka topic contracts, and deployment topology.
