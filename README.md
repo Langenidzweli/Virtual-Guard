@@ -109,53 +109,23 @@ virtual-guard/
 
 ---
 
-## Quick Start
 
-> **Prerequisites:** Docker, Docker Compose, NVIDIA GPU with CUDA 11.8+, RTSP-compatible cameras
-
-```bash
-# 1. Clone the repository
-git clone https://github.com/your-org/virtual-guard.git
-cd virtual-guard
-
-# 2. Copy and configure environment
-cp .env.example .env
-# Edit .env — set RTSP URLs, DB credentials, SMS keys
-
-# 3. Start infrastructure (Kafka, TimescaleDB, Redis, MinIO)
-docker compose up -d kafka timescaledb redis minio
-
-# 4. Start AI services
-docker compose up -d ingestion detection tracking reid behaviour
-
-# 5. Start decision engine and alert manager
-docker compose up -d decision-engine alert-manager
-
-# 6. Start the dashboard
-docker compose up -d dashboard
-
-# Dashboard available at: http://localhost:3000
-```
-
-See [docs/deployment.md](docs/deployment.md) for full production deployment instructions.
-
----
 
 ## How It Works
 
-**1. Ingestion** — Cameras stream RTSP/H.264 video to the ingestion service. FFmpeg/GStreamer decodes frames using GPU hardware acceleration (NVDEC) and publishes JPEG-compressed frames to the `raw_frames` Kafka topic.
+**1. Ingestion**: Cameras stream RTSP/H.264 video to the ingestion service. FFmpeg/GStreamer decodes frames using GPU hardware acceleration (NVDEC) and publishes JPEG-compressed frames to the `raw_frames` Kafka topic.
 
-**2. Detection** — The detection worker consumes frames from Kafka and batches them (8 frames per inference call) through YOLOv9 on GPU. Detection results — bounding boxes, class labels, confidence scores — are published to the `detections` topic.
+**2. Detection**: The detection worker consumes frames from Kafka and batches them (8 frames per inference call) through YOLOv9 on GPU. Detection results — bounding boxes, class labels, confidence scores, are published to the `detections` topic.
 
-**3. Tracking** — ByteTrack consumes detections and assigns persistent track IDs across frames within a single camera. StrongSORT refines identity assignment using appearance features when needed. Track states are published to the `tracks` topic.
+**3. Tracking**: ByteTrack consumes detections and assigns persistent track IDs across frames within a single camera. StrongSORT refines identity assignment using appearance features when needed. Track states are published to the `tracks` topic.
 
-**4. Re-Identification** — OSNet extracts 512-dimensional embeddings for each tracked person. These are matched against the global identity pool stored in FAISS/Redis. Confirmed cross-camera identities are published to the `re_id` topic.
+**4. Re-Identification**: OSNet extracts 512-dimensional embeddings for each tracked person. These are matched against the global identity pool stored in FAISS/Redis. Confirmed cross-camera identities are published to the `re_id` topic.
 
-**5. Behaviour Analysis** — An LSTM Autoencoder analyses trajectories (dwell time, movement speed, path entropy). High reconstruction error signals anomalous behaviour. A rule engine layer applies hard business rules on top. Results are published to the `behaviour_events` topic.
+**5. Behaviour Analysis**: An LSTM Autoencoder analyses trajectories (dwell time, movement speed, path entropy). High reconstruction error signals anomalous behaviour. A rule engine layer applies hard business rules on top. Results are published to the `behaviour_events` topic.
 
-**6. Decision Engine** — Consumes all topics. Calculates a weighted risk score per identity. Applies temporal smoothing (score must exceed threshold for ≥30 seconds) before triggering an alert.
+**6. Decision Engine**: Consumes all topics. Calculates a weighted risk score per identity. Applies temporal smoothing (score must exceed threshold for ≥30 seconds) before triggering an alert.
 
-**7. Alert & Storage** — Alerts are dispatched via SMS, webhook, or push. Events, tracks, and risk history are persisted to TimescaleDB. Video clips and person crops are stored in MinIO/S3. The React dashboard receives live updates over WebSocket.
+**7. Alert & Storage**: Alerts are dispatched via SMS, webhook, or push. Events, tracks, and risk history are persisted to TimescaleDB. Video clips and person crops are stored in MinIO/S3. The React dashboard receives live updates over WebSocket.
 
 ---
 
@@ -202,7 +172,7 @@ Virtual Guard processes biometric data. Before deploying in any real environment
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+This project is currently in active design and development. Contribution guidelines will be added once the implementation phase begins.
 
 ---
 
